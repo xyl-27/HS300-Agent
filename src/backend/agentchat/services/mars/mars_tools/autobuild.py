@@ -72,7 +72,7 @@ async def construct_auto_build_prompt(user_id: Optional[str]) -> str:
     )
 
     # 格式化各类资源信息
-    llms_info = "\n".join([f"{idx+1}. 模型名称: {llm["model"]}, 提供商: {llm["provider"]}"
+    llms_info = "\n".join([f"{idx+1}. 模型名称: {llm['model']}, 提供商: {llm['provider']}"
                            for idx, llm in enumerate(llms_result.get("LLM", []))])
 
     tools_info = "\n".join([f"{idx+1}. 插件工具名称: {tool['en_name']}, 工具描述: {tool['description']}"

@@ -1,26 +1,26 @@
 from sqlmodel import SQLModel, create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
-from src.backend.agentchat.database.models.agent import AgentTable
-from src.backend.agentchat.database.models.history import HistoryTable
-from src.backend.agentchat.database.models.memory_history import MemoryHistoryTable
-from src.backend.agentchat.database.models.user import SystemUser
-from src.backend.agentchat.database.models.knowledge import KnowledgeTable
-from src.backend.agentchat.database.models.knowledge_file import KnowledgeFileTable
-from src.backend.agentchat.database.models.tool import ToolTable
-from src.backend.agentchat.database.models.dialog import DialogTable
-from src.backend.agentchat.database.models.mcp_server import MCPServerTable, MCPServerStdioTable
-from src.backend.agentchat.database.models.mcp_user_config import MCPUserConfigTable
-from src.backend.agentchat.database.models.mcp_agent import MCPAgentTable
-from src.backend.agentchat.database.models.user_role import UserRole
-from src.backend.agentchat.database.models.llm import LLMTable
-from src.backend.agentchat.database.models.message import MessageDownTable, MessageLikeTable
-from src.backend.agentchat.database.models.role import Role
-from src.backend.agentchat.database.models.workspace_session import WorkSpaceSession
-from src.backend.agentchat.database.models.usage_stats import UsageStats
-from src.backend.agentchat.database.models.stock import StockInfo, StockDaily
+from agentchat.database.models.agent import AgentTable
+from agentchat.database.models.history import HistoryTable
+from agentchat.database.models.memory_history import MemoryHistoryTable
+from agentchat.database.models.user import SystemUser
+from agentchat.database.models.knowledge import KnowledgeTable
+from agentchat.database.models.knowledge_file import KnowledgeFileTable
+from agentchat.database.models.tool import ToolTable
+from agentchat.database.models.dialog import DialogTable
+from agentchat.database.models.mcp_server import MCPServerTable, MCPServerStdioTable
+from agentchat.database.models.mcp_user_config import MCPUserConfigTable
+from agentchat.database.models.mcp_agent import MCPAgentTable
+from agentchat.database.models.user_role import UserRole
+from agentchat.database.models.llm import LLMTable
+from agentchat.database.models.message import MessageDownTable, MessageLikeTable
+from agentchat.database.models.role import Role
+from agentchat.database.models.workspace_session import WorkSpaceSession
+from agentchat.database.models.usage_stats import UsageStats
+from agentchat.database.models.stock import StockInfo, StockDaily
 
-from src.backend.agentchat.settings import app_settings
-from src.backend.agentchat.settings import initialize_app_settings
+from agentchat.settings import app_settings
+from agentchat.settings import initialize_app_settings
 import asyncio
 import logging
 
@@ -38,7 +38,8 @@ load_dotenv(override=True)
 # 使用绝对路径加载配置文件
 import os
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml")
-asyncio.run(initialize_app_settings(config_file_path))
+# 移除asyncio.run()调用，因为在FastAPI启动过程中已经有一个正在运行的事件循环
+# asyncio.run(initialize_app_settings(config_file_path))
 logger.info(f"配置文件加载路径: {config_file_path}")
 logger.info(f"配置文件是否存在: {os.path.exists(config_file_path)}")
 

@@ -29,74 +29,15 @@ session_getter = None
 StockInfo = None
 StockDaily = None
 
-# 使用importlib动态导入，避免循环导入问题
+# 使用正常的模块导入，避免动态导入导致的重复定义问题
+# 导入数据库模型
 try:
-    import importlib.util
-    import sys
+    from src.backend.agentchat.database.models.stock import StockInfo, StockDaily
+    logger.info("成功导入StockInfo和StockDaily模型")
     
-    # 直接导入stock模型文件
-    stock_model_path = os.path.join(src_dir, 'backend', 'agentchat', 'database', 'models', 'stock.py')
-    logger.info(f"尝试从文件导入stock模型: {stock_model_path}")
-    
-    if os.path.exists(stock_model_path):
-        spec = importlib.util.spec_from_file_location("stock_model", stock_model_path)
-        stock_model = importlib.util.module_from_spec(spec)
-        sys.modules["stock_model"] = stock_model
-        spec.loader.exec_module(stock_model)
-        
-        StockInfo = stock_model.StockInfo
-        StockDaily = stock_model.StockDaily
-        logger.info("成功导入StockInfo和StockDaily模型")
-    else:
-        logger.error(f"stock模型文件不存在: {stock_model_path}")
-    
-    # 导入session_getter，避免导入整个database模块
-    session_path = os.path.join(src_dir, 'backend', 'agentchat', 'database', 'session.py')
-    logger.info(f"尝试从文件导入session: {session_path}")
-    
-    if os.path.exists(session_path):
-        # 读取session.py文件内容
-        with open(session_path, 'r', encoding='utf-8') as f:
-            session_content = f.read()
-        
-        # 修改导入语句，避免导入整个database模块
-        # 直接创建一个简化的session_getter函数，并确保所有依赖都在作用域中
-        from contextlib import contextmanager
-        from sqlmodel import Session, create_engine
-        from src.backend.agentchat.settings import app_settings
-        import asyncio
-        
-        # 确保mysql配置存在
-        if not app_settings.mysql:
-            app_settings.mysql = {
-                'endpoint': 'mysql+pymysql://root:qwe123@localhost:3306/agentchat',
-                'async_endpoint': 'mysql+aiomysql://root:qwe123@localhost:3306/agentchat'
-            }
-        
-        # 创建数据库引擎
-        engine = create_engine(app_settings.mysql.get('endpoint'),
-                               pool_pre_ping=True,
-                               pool_recycle=3600,
-                               connect_args={"charset": "utf8mb4",
-                                             "use_unicode": True,
-                                             "init_command": "SET SESSION time_zone = '+08:00'"})
-        
-        @contextmanager
-        def session_getter():
-            session = Session(engine)
-            try:
-                yield session
-            except Exception as e:
-                logger.error(f'Session rollback because of exception:{e}')
-                session.rollback()
-                raise
-            finally:
-                session.close()
-        
-        logger.info("成功创建session_getter")
-    else:
-        logger.error(f"session文件不存在: {session_path}")
-    
+    # 导入session_getter
+    from src.backend.agentchat.database.session import session_getter
+    logger.info("成功导入session_getter")
 except Exception as e:
     logger.error(f"导入数据库模块失败: {e}")
     # 继续执行，数据库功能可能不可用，但其他功能仍然可以使用

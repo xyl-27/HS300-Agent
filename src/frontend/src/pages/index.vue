@@ -104,20 +104,21 @@ const updateList = async () => {
 }
 
 const goCurrent = (item: string) => {
-  const routes: Record<string, string> = {
-    "homepage": "/homepage",
-    "conversation": "/conversation",
-    "agent": "/agent",
-    "mcp-server": "/mcp-server",
-    "knowledge": "/knowledge",
-    "tool": "/tool",
-    "model": "/model",
-    "workspace": "/workspace",
-    "dashboard": "/dashboard"
+    const routes: Record<string, string> = {
+      "homepage": "/homepage",
+      "conversation": "/conversation",
+      "agent": "/agent",
+      "mcp-server": "/mcp-server",
+      "knowledge": "/knowledge",
+      "tool": "/tool",
+      "model": "/model",
+      "workspace": "/workspace",
+      "dashboard": "/dashboard",
+      "data": "/data"
+    }
+    
+    router.push(routes[item] || "/")
   }
-  
-  router.push(routes[item] || "/")
-}
 
 // 用户下拉菜单命令处理
 const handleUserCommand = async (command: string) => {
@@ -288,6 +289,14 @@ watch(
                   <img src="../assets/dashboard.svg" width="22px" height="22px" />
                 </el-icon>
                 <span>数据看板</span>
+              </template>
+            </el-menu-item>
+            <el-menu-item index="data" @click="goCurrent('data')">
+              <template #title>
+                <el-icon>
+                  <img src="../assets/dashboard.svg" width="22px" height="22px" />
+                </el-icon>
+                <span>行业分析</span>
               </template>
             </el-menu-item>
           </el-menu>

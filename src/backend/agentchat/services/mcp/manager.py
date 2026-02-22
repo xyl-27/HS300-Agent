@@ -94,8 +94,8 @@ class MCPManager:
             tool_results = await asyncio.gather(*tasks, return_exceptions=True)
             for i, result in enumerate(tool_results):
                 if isinstance(result, Exception):
-                    tool_results[i] = f"Error executing tool {tools_info[i].get("tool_name")}: {result}"
-                    logger.error(f"Error executing tool {tools_info[i].get("tool_name")}: {result}")
+                    tool_results[i] = f"Error executing tool {tools_info[i].get('tool_name')}: {result}"
+                    logger.error(f"Error executing tool {tools_info[i].get('tool_name')}: {result}")
             return tool_results
         except Exception as err:
             logger.error(f"Error calling tools: {err}")

@@ -14,7 +14,7 @@ class WeChatService:
     @classmethod
     def _get_access_token(cls):
         wechat_conf = app_settings.wechat_config
-        url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={wechat_conf.get("app_id")}&secret={wechat_conf.get("secret")}"
+        url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={wechat_conf.get('app_id')}&secret={wechat_conf.get('secret')}"
         try:
             with httpx.Client() as client:
                 response = client.get(url, timeout=10)

@@ -69,6 +69,6 @@ class UsageMetadataCallbackHandler(BaseCallbackHandler):
             'input_tokens': usage_metadata.get("input_tokens", 0),
             'output_tokens': usage_metadata.get("output_tokens", 0),
         }
-        logger.info(f"{model_name} cost input tokens: {usage_metadata.get("input_tokens")}, output tokens: {usage_metadata.get("output_tokens")}")
+        logger.info(f"{model_name} cost input tokens: {usage_metadata.get('input_tokens')}, output tokens: {usage_metadata.get('output_tokens')}")
 
         UsageStatsService.sync_create_usage_stats(**record)

@@ -87,9 +87,9 @@ def get_convert_markdown_images_dir():
 def generate_unique_filename(file_name: str, file_suffix: str=None) -> str:
     file_name = os.path.basename(file_name)
     if file_suffix:
-        return f"{file_name.split(".")[0]}_{uuid4().hex}.{file_suffix}"
+        return f"{file_name.split('.')[0]}_{uuid4().hex}.{file_suffix}"
     else:
-        return f"{file_name.split(".")[0]}_{uuid4().hex}.{file_name.split(".")[-1]}"
+        return f"{file_name.split('.')[0]}_{uuid4().hex}.{file_name.split('.')[-1]}"
 
 async def get_oss_object_name(file_path, knowledge_id):
     file_name = os.path.basename(file_path)

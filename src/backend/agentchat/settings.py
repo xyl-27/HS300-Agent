@@ -3,7 +3,7 @@ from loguru import logger
 from types import SimpleNamespace
 from pydantic.v1 import BaseSettings, Field
 
-from src.backend.agentchat.schema.common import MultiModels, ModelConfig, Tools, Rag
+from agentchat.schema.common import MultiModels, ModelConfig, Tools, Rag
 
 class Settings(BaseSettings):
     aliyun_oss: dict = {}

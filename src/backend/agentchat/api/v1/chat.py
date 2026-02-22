@@ -80,7 +80,11 @@ async def chat(*,
     if agent_config.enable_memory:
         # 启用向量化记忆模式：通过语义搜索获取相关历史上下文
         history_messages = await memory_client.search(query=original_user_input, run_id=conversation_req.dialog_id)
-        messages[0].content = SYSTEM_PROMPT.format(history=f"<chat_history>\n {'\n'.join(msg.get('memory', '') for msg in history_messages.get('results'))} </chat_history>")
+        # 先构建历史消息字符串，避免在f-string中使用反斜杠
+        history_content = '<chat_history>\n'
+        history_content += '\n'.join(msg.get('memory', '') for msg in history_messages.get('results'))
+        history_content += ' </chat_history>'
+        messages[0].content = SYSTEM_PROMPT.format(history=history_content)
     else:
         # 传统历史记录模式：从数据库获取完整对话历史并融入系统提示词
         history_messages = await HistoryService.select_history(conversation_req.dialog_id)

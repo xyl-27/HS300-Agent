@@ -169,7 +169,7 @@ def crawl_today_ai_news(url=None):
 
         daily_news = f"页面标题: {page_title}\n\n"
         for content in news_content:
-            daily_news += f"{content} \n {"-" * 50} \n"
+            daily_news += f"{content} \n {'-' * 50} \n"
 
         return daily_news, news_links
     except Exception as e:

@@ -110,7 +110,7 @@ async def handle_wechat_message(request: Request):
         if workspace_session:
             contexts = workspace_session.get("contexts", [])
             history_messages = "\n".join(
-                [f"user query: {message.get("query")}, answer: {message.get("answer")}\n" for message in
+                [f"user query: {message.get('query')}, answer: {message.get('answer')}\n" for message in
                  reversed(contexts[-2:])])
         else:
             history_messages = "无历史对话"

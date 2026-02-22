@@ -1,3 +1,31 @@
+import os
+import sys
+
+# 获取当前文件的绝对路径
+current_file = os.path.abspath(__file__)
+# 获取agentchat目录的路径
+agentchat_dir = os.path.dirname(current_file)
+# 获取backend目录的路径
+backend_dir = os.path.dirname(agentchat_dir)
+# 获取src目录的路径
+src_dir = os.path.dirname(backend_dir)
+# 获取项目根目录的路径
+project_dir = os.path.dirname(src_dir)
+
+# 添加项目根目录到Python路径
+sys.path.insert(0, project_dir)
+# 添加src目录到Python路径
+sys.path.insert(0, src_dir)
+# 添加backend目录到Python路径
+sys.path.insert(0, backend_dir)
+
+print(f"当前文件: {current_file}")
+print(f"agentchat目录: {agentchat_dir}")
+print(f"backend目录: {backend_dir}")
+print(f"src目录: {src_dir}")
+print(f"项目根目录: {project_dir}")
+print(f"Python路径前5项: {sys.path[:5]}")
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request

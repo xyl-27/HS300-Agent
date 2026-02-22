@@ -87,7 +87,7 @@ async def workspace_simple_chat(simple_task: WorkSpaceSimpleTask,
     workspace_session = await WorkSpaceSessionService.get_workspace_session_from_id(simple_task.session_id, login_user.user_id)
     if workspace_session:
         contexts = workspace_session.get("contexts", [])
-        history_messages = [f"query: {message.get("query")}, answer: {message.get("answer")}\n" for message in contexts]
+        history_messages = [f"query: {message.get('query')}, answer: {message.get('answer')}\n" for message in contexts]
     else:
         history_messages = "无历史对话"
 

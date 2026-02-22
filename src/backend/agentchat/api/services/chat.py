@@ -85,25 +85,25 @@ class EmitEventAgentMiddleware(AgentMiddleware):
         # 发送工具分析开始事件
         writer({
             "status": "START",
-            "title": f"执行可用工具: {request.tool_call["name"]}",
-            "message": f"正在调用插件工具 {request.tool_call["name"]}..."
+            "title": f"执行可用工具: {request.tool_call['name']}",
+            "message": f"正在调用插件工具 {request.tool_call['name']}..."
             })
         request.state["tool_call_count"] = tool_call_count + 1
         try:
             tool_result = await handler(request)
             writer({
                 "status": "END",
-                "title": f"执行可用工具: {request.tool_call["name"]}",
+                "title": f"执行可用工具: {request.tool_call['name']}",
                 "message": tool_result.content
                 })
             return tool_result
         except Exception as err:
             writer({
                 "status": "ERROR",
-                "title": f"执行可用工具: {request.tool_call["name"]}",
+                "title": f"执行可用工具: {request.tool_call['name']}",
                 "message": str(err)
             })
-            return ToolMessage(content=str(err), name=request.tool_call["name"], tool_call_id=request.tool_call["id"])
+            return ToolMessage(content=str(err), name=request.tool_call['name'], tool_call_id=request.tool_call['id'])
 
 class StreamingAgent:
     def __init__(self, agent_config: AgentConfig):

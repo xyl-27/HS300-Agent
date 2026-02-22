@@ -72,8 +72,8 @@ class MCPAgent:
             await self.emit_event(
                 {
                     "status": "START",
-                    "title": f"Sub-Agent - {self.mcp_config.server_name}执行可用工具: {request.tool_call["name"]}",
-                    "messages": f"正在调用工具 {request.tool_call["name"]}..."
+                    "title": f'Sub-Agent - {self.mcp_config.server_name}执行可用工具: {request.tool_call["name"]}',
+                    "messages": f'正在调用工具 {request.tool_call["name"]}...'
                 }
             )
 
@@ -86,8 +86,8 @@ class MCPAgent:
             await self.emit_event(
                 {
                     "status": "END",
-                    "title": f"Sub-Agent - {self.mcp_config.server_name}执行可用工具: {request.tool_call["name"]}",
-                    "messages": f"{tool_result}"
+                    "title": f'Sub-Agent - {self.mcp_config.server_name}执行可用工具: {request.tool_call["name"]}',
+                    "messages": f'{tool_result}'
                 }
             )
             return tool_result

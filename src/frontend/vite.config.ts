@@ -10,21 +10,21 @@ export default defineConfig({
     port: 8090,
     // 是否开启 https
     https: false,
-      // 设置反向代理，跨域
-      proxy: {
-        '/api': {
-          target: 'http://localhost:7860/',
-          changeOrigin: true,
+    // 设置反向代理，跨域
+    proxy: {
+      '/api': {
+        target: 'http://192.168.119.130:7860/',
+        changeOrigin: true
       }
-    },
+    }
   },
-  plugins: [vue(),
+  plugins: [
+    vue(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [ElementPlusResolver()]
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
-    }),
-  ],
-  
+      resolvers: [ElementPlusResolver()]
+    })
+  ]
 })
