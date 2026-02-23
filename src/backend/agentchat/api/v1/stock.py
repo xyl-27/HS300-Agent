@@ -115,6 +115,19 @@ def get_industry_stock_hierarchy():
         raise HTTPException(status_code=404, detail="无法获取行业-股票层级数据")
     return hierarchy_data
 
+@router.get("/industry/stock-hierarchy/analysis", response_model=Dict)
+async def analyze_stock_hierarchy():
+    """
+    分析行业-股票层级数据，生成投资建议
+    
+    Returns:
+        包含分析报告和投资建议的字典
+    """
+    analysis_result = await stock_service.analyze_hotmap_data()
+    if not analysis_result:
+        raise HTTPException(status_code=404, detail="无法分析行业-股票层级数据")
+    return analysis_result
+
 @router.get("/industry/analyze", response_model=Dict)
 def analyze_industry(
     industry: str = Query(..., description="行业名称"),

@@ -427,7 +427,7 @@ class StockService:
         """
         获取行业-股票层级数据，用于 treemap 可视化
         只读取 stock_info 和 stock_daily 两张表的数据
-        
+
         Returns:
             行业-股票层级数据，包含行业名称、市值、股票列表等信息
         """
@@ -511,6 +511,161 @@ class StockService:
             
         except Exception as e:
             logger.error(f"获取行业-股票层级数据失败: {e}")
+            logger.exception(e)
+            return None
+    
+    async def analyze_hotmap_data(self) -> Optional[Dict]:
+        """
+        分析大盘星图数据，生成投资建议
+        
+        Returns:
+            包含分析报告和投资建议的字典
+        """
+        try:
+            logger.info("开始分析大盘星图数据")
+            
+            # 导入必要的模块
+            from agentchat.prompts.hotmap_analysis import hotmap_analysis_prompt
+            from datetime import datetime
+            
+            # 获取大盘星图数据
+            logger.info("获取大盘星图数据")
+            hotmap_data = self.get_industry_stock_hierarchy()
+            if not hotmap_data:
+                logger.error("无法获取大盘星图数据，分析失败")
+                return None
+            logger.info(f"成功获取大盘星图数据，包含 {len(hotmap_data)} 个行业")
+            
+            # 准备分析数据
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.info(f"分析时间: {current_time}")
+            
+            # 优化 hotmap_data，减少 prompt 大小
+            logger.info("优化 hotmap_data，减少 prompt 大小")
+            
+            # 1. 按市值排序，取前10个行业
+            sorted_by_value = sorted(hotmap_data, key=lambda x: x['value'], reverse=True)[:10]
+            
+            # 2. 按涨跌幅排序，取前5个和后5个行业
+            sorted_by_increase = sorted(hotmap_data, key=lambda x: x['increase'], reverse=True)
+            top_increase = sorted_by_increase[:5]
+            bottom_increase = sorted_by_increase[-5:]
+            
+            # 3. 构建优化后的数据结构
+            optimized_data = {
+                "total_industries": len(hotmap_data),
+                "top_by_value": [
+                    {
+                        "name": industry['name'],
+                        "value": industry['value'],
+                        "increase": industry['increase'],
+                        "stock_count": industry['stock_count']
+                    }
+                    for industry in sorted_by_value
+                ],
+                "top_by_increase": [
+                    {
+                        "name": industry['name'],
+                        "value": industry['value'],
+                        "increase": industry['increase'],
+                        "stock_count": industry['stock_count']
+                    }
+                    for industry in top_increase
+                ],
+                "bottom_by_increase": [
+                    {
+                        "name": industry['name'],
+                        "value": industry['value'],
+                        "increase": industry['increase'],
+                        "stock_count": industry['stock_count']
+                    }
+                    for industry in bottom_increase
+                ]
+            }
+            
+            # 构建prompt
+            logger.info("构建分析prompt")
+            prompt = hotmap_analysis_prompt.format(
+                current_time=current_time,
+                hotmap_data=str(optimized_data)
+            )
+            logger.info(f"prompt长度: {len(prompt)}")
+            
+            # 尝试导入ModelManager和HumanMessage
+            try:
+                from agentchat.core.models.manager import ModelManager
+                from langchain_core.messages import HumanMessage
+                logger.info("成功导入ModelManager和HumanMessage")
+            except Exception as import_error:
+                logger.error(f"导入模块失败: {import_error}")
+                # 由于LLM导入失败，返回一个模拟的分析结果
+                result = {
+                    "analysis_time": current_time,
+                    "industry_count": len(hotmap_data),
+                    "analysis_report": "由于模型服务暂时不可用，无法提供详细分析。建议关注以下几个方面：1. 行业分布情况；2. 涨跌行业比例；3. 市值分布特征；4. 潜在的投资机会。"
+                }
+                logger.info("返回模拟分析结果")
+                return result
+            
+            # 获取大模型实例
+            try:
+                logger.info("获取大模型实例")
+                llm = ModelManager.get_reasoning_model()
+                logger.info("成功获取大模型实例")
+            except Exception as model_error:
+                logger.error(f"获取大模型实例失败: {model_error}")
+                # 由于LLM获取失败，返回一个模拟的分析结果
+                result = {
+                    "analysis_time": current_time,
+                    "industry_count": len(hotmap_data),
+                    "analysis_report": "由于模型服务暂时不可用，无法提供详细分析。建议关注以下几个方面：1. 行业分布情况；2. 涨跌行业比例；3. 市值分布特征；4. 潜在的投资机会。"
+                }
+                logger.info("返回模拟分析结果")
+                return result
+            
+            # 调用大模型进行分析
+            try:
+                logger.info("调用大模型进行分析")
+                messages = [HumanMessage(content=prompt)]
+                response_stream = await llm.astream(messages)
+                
+                # 处理流式响应，获取完整内容
+                full_content = ""
+                async for chunk in response_stream:
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        full_content += chunk.choices[0].delta.content
+                
+                # 构建响应对象
+                class MockResponse:
+                    def __init__(self, content):
+                        self.content = content
+                
+                response = MockResponse(full_content)
+                logger.info("成功调用大模型进行分析")
+            except Exception as invoke_error:
+                logger.error(f"调用大模型失败: {invoke_error}")
+                logger.exception(invoke_error)
+                # 由于LLM调用失败，返回一个模拟的分析结果
+                result = {
+                    "analysis_time": current_time,
+                    "industry_count": len(hotmap_data),
+                    "analysis_report": "由于模型服务暂时不可用，无法提供详细分析。建议关注以下几个方面：1. 行业分布情况；2. 涨跌行业比例；3. 市值分布特征；4. 潜在的投资机会。"
+                }
+                logger.info("返回模拟分析结果")
+                return result
+            
+            # 构建返回结果
+            result = {
+                "analysis_time": current_time,
+                "industry_count": len(hotmap_data),
+                "analysis_report": response.content
+            }
+            
+            logger.info("大盘星图数据分析完成")
+            return result
+            
+        except Exception as e:
+            logger.error(f"分析大盘星图数据失败: {e}")
             logger.exception(e)
             return None
     

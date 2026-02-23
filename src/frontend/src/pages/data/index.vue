@@ -581,7 +581,7 @@ const initHotmapChart = () => {
     // 确保容器有正确的尺寸
     const container = marketHotmapRef.value
     container.style.width = '100%'
-    container.style.height = '600px'
+    container.style.height = '800px'
     console.log('设置容器尺寸:', container.clientWidth, 'x', container.clientHeight)
     
     // 销毁之前的图表实例
@@ -726,7 +726,7 @@ const updateHotmapChart = async function() {
       // 确保容器有尺寸
       if (container.clientWidth === 0 || container.clientHeight === 0) {
         container.style.width = '100%';
-        container.style.height = '600px';
+        container.style.height = '800px';
       }
       console.log('容器尺寸:', container.clientWidth, 'x', container.clientHeight);
       
@@ -834,22 +834,87 @@ const updateHotmapChart = async function() {
       console.log('------------------------------------');
     }
     
-    // 处理数据
+    // 向0取整函数，为中间值设置折中值
+    function roundTowardsZeroWithMidpoints(num) {
+      // 确保值在-4到4之间
+      num = Math.max(-4, Math.min(4, num));
+      
+      const sign = Math.sign(num);
+      const absNum = Math.abs(num);
+      
+      // 严格按照0.5间隔取整
+      const roundedAbs = Math.round(absNum * 2) / 2;
+      
+      // 确保值在范围内
+      const clampedValue = Math.max(-4, Math.min(4, sign * roundedAbs));
+      
+      return clampedValue;
+    }
+    
+    // 处理数据并直接设置颜色
     function convertData(originList) {
+      // 定义颜色映射，使用用户提供的精确RGB值
+      const colorMap = {
+        '-4.0': 'rgb(0, 214, 65)',
+        '-3.5': 'rgb(13, 189, 68)',
+        '-3.0': 'rgb(26, 164, 72)',
+        '-2.5': 'rgb(20, 137, 59)',
+        '-2.0': 'rgb(14, 111, 47)',
+        '-1.5': 'rgb(11, 97, 40)',
+        '-1.0': 'rgb(8, 84, 33)',
+        '-0.5': 'rgb(37, 76, 58)',
+        '0.0': 'rgb(66, 68, 83)',
+        '0.5': 'rgb(87, 44, 51)',
+        '1.0': 'rgb(109, 20, 20)',
+        '1.5': 'rgb(130, 18, 18)',
+        '2.0': 'rgb(150, 16, 16)',
+        '2.5': 'rgb(170, 12, 12)',
+        '3.0': 'rgb(190, 8, 8)',
+        '3.5': 'rgb(209, 14, 14)',
+        '4.0': 'rgb(228, 20, 20)'
+      };
+      
       for (let i = 0; i < originList.length; i++) {
         let node = originList[i];
         if (node) {
           let value = node.value;
-          // 计算视觉值
-          value[3] = value[2] * 10;
-          console.log('行业', node.name, '的视觉值:', value[3]);
-          
-          if (node.children) {
-            for (let j = 0; j < node.children.length; j++) {
-              let child = node.children[j];
-              if (child && child.value) {
-                child.value[3] = child.value[2] * 10;
-                console.log('股票', child.name, '的视觉值:', child.value[3]);
+          if (value && value[2] !== undefined) {
+            // 计算颜色映射值
+            const change = value[2];
+            const sign = Math.sign(change);
+            const absChange = Math.abs(change);
+            const roundedAbs = Math.round(absChange * 2) / 2;
+            const mappedValue = sign * roundedAbs;
+            const clampedValue = Math.max(-4, Math.min(4, mappedValue));
+            const valueKey = clampedValue.toFixed(1);
+            
+            // 直接设置颜色属性
+            node.itemStyle = {
+              color: colorMap[valueKey] || colorMap['0.0']
+            };
+            
+            console.log('行业', node.name, '的涨跌幅:', change, '颜色:', node.itemStyle.color);
+            
+            if (node.children) {
+              for (let j = 0; j < node.children.length; j++) {
+                let child = node.children[j];
+                if (child && child.value && child.value[2] !== undefined) {
+                  // 计算股票颜色映射值
+                  const stockChange = child.value[2];
+                  const stockSign = Math.sign(stockChange);
+                  const stockAbsChange = Math.abs(stockChange);
+                  const stockRoundedAbs = Math.round(stockAbsChange * 2) / 2;
+                  const stockMappedValue = stockSign * stockRoundedAbs;
+                  const stockClampedValue = Math.max(-4, Math.min(4, stockMappedValue));
+                  const stockValueKey = stockClampedValue.toFixed(1);
+                  
+                  // 直接设置颜色属性
+                  child.itemStyle = {
+                    color: colorMap[stockValueKey] || colorMap['0.0']
+                  };
+                  
+                  console.log('股票', child.name, '的涨跌幅:', stockChange, '颜色:', child.itemStyle.color);
+                }
               }
             }
           }
@@ -905,21 +970,16 @@ const updateHotmapChart = async function() {
           itemStyle: {
             borderColor: '#fff'
           },
-          visualMin: -50,
-          visualMax: 50,
-          visualDimension: 3,
+
           levels: [
             {
               itemStyle: {
                 borderColor: '#555',
                 borderWidth: 4,
-                gapWidth: 4,
-                color: '#f0f0f0'
+                gapWidth: 4
               }
             },
             {
-              color: ['#67c23a', '#f56c6c'],
-              colorMappingBy: 'value',
               itemStyle: {
                 borderColor: '#ddd',
                 borderWidth: 1,
@@ -1022,18 +1082,87 @@ const updateHotmapChart = async function() {
       }
     ];
     
-    // 处理模拟数据
+    // 向0取整函数，为中间值设置折中值
+    function roundTowardsZeroWithMidpoints(num) {
+      // 确保值在-4到4之间
+      num = Math.max(-4, Math.min(4, num));
+      
+      const sign = Math.sign(num);
+      const absNum = Math.abs(num);
+      
+      // 严格按照0.5间隔取整
+      const roundedAbs = Math.round(absNum * 2) / 2;
+      
+      // 确保值在范围内
+      const clampedValue = Math.max(-4, Math.min(4, sign * roundedAbs));
+      
+      return clampedValue;
+    }
+    
+    // 处理模拟数据并直接设置颜色
     function convertData(originList) {
+      // 定义颜色映射，使用用户提供的精确RGB值
+      const colorMap = {
+        '-4.0': 'rgb(0, 214, 65)',
+        '-3.5': 'rgb(13, 189, 68)',
+        '-3.0': 'rgb(26, 164, 72)',
+        '-2.5': 'rgb(20, 137, 59)',
+        '-2.0': 'rgb(14, 111, 47)',
+        '-1.5': 'rgb(11, 97, 40)',
+        '-1.0': 'rgb(8, 84, 33)',
+        '-0.5': 'rgb(37, 76, 58)',
+        '0.0': 'rgb(66, 68, 83)',
+        '0.5': 'rgb(87, 44, 51)',
+        '1.0': 'rgb(109, 20, 20)',
+        '1.5': 'rgb(130, 18, 18)',
+        '2.0': 'rgb(150, 16, 16)',
+        '2.5': 'rgb(170, 12, 12)',
+        '3.0': 'rgb(190, 8, 8)',
+        '3.5': 'rgb(209, 14, 14)',
+        '4.0': 'rgb(228, 20, 20)'
+      };
+      
       for (let i = 0; i < originList.length; i++) {
         let node = originList[i];
         if (node) {
           let value = node.value;
-          value[3] = value[2] * 10;
-          if (node.children) {
-            for (let j = 0; j < node.children.length; j++) {
-              let child = node.children[j];
-              if (child && child.value) {
-                child.value[3] = child.value[2] * 10;
+          if (value && value[2] !== undefined) {
+            // 计算颜色映射值
+            const change = value[2];
+            const sign = Math.sign(change);
+            const absChange = Math.abs(change);
+            const roundedAbs = Math.round(absChange * 2) / 2;
+            const mappedValue = sign * roundedAbs;
+            const clampedValue = Math.max(-4, Math.min(4, mappedValue));
+            const valueKey = clampedValue.toFixed(1);
+            
+            // 直接设置颜色属性
+            node.itemStyle = {
+              color: colorMap[valueKey] || colorMap['0.0']
+            };
+            
+            console.log('模拟行业', node.name, '的涨跌幅:', change, '颜色:', node.itemStyle.color);
+            
+            if (node.children) {
+              for (let j = 0; j < node.children.length; j++) {
+                let child = node.children[j];
+                if (child && child.value && child.value[2] !== undefined) {
+                  // 计算股票颜色映射值
+                  const stockChange = child.value[2];
+                  const stockSign = Math.sign(stockChange);
+                  const stockAbsChange = Math.abs(stockChange);
+                  const stockRoundedAbs = Math.round(stockAbsChange * 2) / 2;
+                  const stockMappedValue = stockSign * stockRoundedAbs;
+                  const stockClampedValue = Math.max(-4, Math.min(4, stockMappedValue));
+                  const stockValueKey = stockClampedValue.toFixed(1);
+                  
+                  // 直接设置颜色属性
+                  child.itemStyle = {
+                    color: colorMap[stockValueKey] || colorMap['0.0']
+                  };
+                  
+                  console.log('模拟股票', child.name, '的涨跌幅:', stockChange, '颜色:', child.itemStyle.color);
+                }
               }
             }
           }
@@ -1087,21 +1216,16 @@ const updateHotmapChart = async function() {
           itemStyle: {
             borderColor: '#fff'
           },
-          visualMin: -50,
-          visualMax: 50,
-          visualDimension: 3,
+
           levels: [
             {
               itemStyle: {
                 borderColor: '#555',
                 borderWidth: 4,
-                gapWidth: 4,
-                color: '#f0f0f0'
+                gapWidth: 4
               }
             },
             {
-              color: ['#67c23a', '#f56c6c'],
-              colorMappingBy: 'value',
               itemStyle: {
                 borderColor: '#ddd',
                 borderWidth: 1,
@@ -1576,7 +1700,7 @@ const initHotmapChartWithSize = function() {
             
             <!-- 图表容器（始终存在） -->
             <div style="position: relative;">
-              <div ref="marketHotmapRef" style="width: 100%; height: 600px; min-width: 800px; min-height: 600px; margin: 0 auto; background-color: #f5f5f5; border: 1px solid #ddd;"></div>
+              <div ref="marketHotmapRef" style="width: 100%; height: 800px; min-width: 1000px; min-height: 800px; margin: 0 auto; background-color: #f5f5f5; border: 1px solid #ddd;"></div>
               
               <!-- 加载状态覆盖层 -->
               <div v-if="hotmapLoading" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; align-items: center;">
